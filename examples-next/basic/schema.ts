@@ -77,6 +77,15 @@ export const lists = createSchema({
       roles: text({}),
       posts: relationship({ ref: 'Post.author', many: true }),
       something: text({ isMultiline: true }),
+
+      // TODO: Temp; these should be added by the auth package, here just until we figure out the syntax
+      // TODO: Should these be named for `config.secretField`?
+      passwordResetToken: text({ access: () => false, isRequired: false }),
+      passwordResetIssuedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      passwordResetRedeemedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      magicAuthToken: text({ access: () => false, isRequired: false }),
+      magicAuthIssuedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      magicAuthRedeemedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
     },
   }),
   Post: list({
