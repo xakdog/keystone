@@ -3,24 +3,27 @@ import { BaseGeneratedListTypes, KeystoneAdminConfig, KeystoneConfig } from '@ke
 export type SendTokenFn = (args: {
   // TODO: should we know, through config, how to generate a fully-qualified URL? how are we
   // handling the protocol/server/port that the app is hosted on?
-  token: string;
+  // JM: ^^^ Pretty sure, not?
+  itemId: string | number;
   identity: string;
-  itemId: string;
+  token: string;
 }) => Promise<void> | void;
 
 export type AuthGqlNames = {
   /** Change the name of the authenticate{listKey}WithPassword mutation */
   authenticateItemWithPassword?: string;
-  /** Change the name of the send{listKey}ForgottenPassword mutation */
-  sendItemForgottenPassword?: string;
-  /** Change the name of the send{listKey}MagicAuthenticateLink mutation */
-  sendItemMagicAuthenticateLink?: string;
+  /** Change the name of the send{listKey}PasswordResetLink mutation */
+  sendItemPasswordResetLink?: string;
+  /** Change the name of the send{listKey}MagicAuthLink mutation */
+  sendItemMagicAuthLink?: string;
   /** Change the name of the createInitial{listKey} mutation */
   createInitialItem?: string;
 };
 
 export type ResolvedAuthGqlNames = Required<AuthGqlNames> & {
   ItemAuthenticationWithPasswordResult: string;
+  sendItemPasswordResetLinkResult: string;
+  sendItemMagicAuthLinkResult: string;
 };
 
 export type AuthConfig<GeneratedListTypes extends BaseGeneratedListTypes> = {
@@ -31,15 +34,17 @@ export type AuthConfig<GeneratedListTypes extends BaseGeneratedListTypes> = {
   /** The path of the field the secret is stored in; must be password-ish */
   secretField: GeneratedListTypes['fields'];
 
+  // Attempts to prevent consumers of the API from being able to determine the value of identity fields
   protectIdentities?: boolean;
 
+  // Query and mutation names to use
   gqlNames?: AuthGqlNames;
 
-  forgottenPassword?: {
+  passwordResetLink?: {
     /** Called when a user should be sent the forgotten password token they requested */
     sendToken: SendTokenFn;
   };
-  magicLink?: {
+  magicAuthLink?: {
     /** Called when a user should be sent the magic signin token they requested */
     sendToken: SendTokenFn;
   };

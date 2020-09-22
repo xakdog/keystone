@@ -22,11 +22,14 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
   config: AuthConfig<GeneratedListTypes>
 ): Auth {
   const gqlNames: ResolvedAuthGqlNames = {
-    authenticateItemWithPassword: `authenticate${config.listKey}WithPassword`,
+    // TODO: `config.listKey` here should be something like `uppercased(singular(config.listKey))`
     createInitialItem: `createInitial${config.listKey}`,
-    sendItemForgottenPassword: `send${config.listKey}ForgottenPassword`,
-    sendItemMagicAuthenticateLink: `send${config.listKey}MagicAuthenticateLink`,
+    authenticateItemWithPassword: `authenticate${config.listKey}WithPassword`,
     ItemAuthenticationWithPasswordResult: `${config.listKey}AuthenticationWithPasswordResult`,
+    sendItemPasswordResetLink: `send${config.listKey}PasswordResetLink`,
+    sendItemPasswordResetLinkResult: `send${config.listKey}PasswordResetLinkResult`,
+    sendItemMagicAuthLink: `send${config.listKey}MagicAuthLink`,
+    sendItemMagicAuthLinkResult: `send${config.listKey}MagicAuthLinkResult`,
   };
 
   /**
