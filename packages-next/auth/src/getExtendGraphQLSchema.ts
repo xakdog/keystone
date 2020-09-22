@@ -57,7 +57,8 @@ export function getExtendGraphQLSchema({
           ` but field type does not provide the required generateHash() functionality.`
       );
     }
-    }
+    // TODO: Also validate the identity field is Stringy?
+  }
 
   async function attemptAuthentication(
     args: Record<string, string>,

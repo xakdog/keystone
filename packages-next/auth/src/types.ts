@@ -26,6 +26,7 @@ export type ResolvedAuthGqlNames = Required<AuthGqlNames> & {
   sendItemMagicAuthLinkResult: string;
 };
 
+// TODO: Allow a function to be supplied to implement rate limiting
 export type AuthConfig<GeneratedListTypes extends BaseGeneratedListTypes> = {
   /** The key of the list to authenticate users with */
   listKey: GeneratedListTypes['key'];
