@@ -2,7 +2,6 @@ import { graphQLSchemaExtension } from '@keystone-spike/keystone/schema';
 import { ResolvedAuthGqlNames, SendTokenFn } from './types';
 import { randomBytes } from 'crypto';
 
-// TODO: Should put a utility function like this somewhere else?
 let generateToken = function (length: number): string {
   return randomBytes(length)
     .toString('base64')
@@ -10,22 +9,14 @@ let generateToken = function (length: number): string {
     .replace(/[^a-zA-Z0-9]/g, '');
 };
 
-// TODO: Not produciton ready; logging auth tokens to the console ain't very secure
-const buildDefaultSendFn = (linkType: string) =>
-  function (args: { itemId: string | number; identity: string; token: string }): void {
-    console.log(`Sending ${linkType} link:`, args);
-  };
-
 export function getExtendGraphQLSchema({
   listKey,
   identityField,
   secretField,
   protectIdentities,
   gqlNames,
-  passwordResetLink: { sendToken: sendPasswordResetLink } = {
-    sendToken: buildDefaultSendFn('Password Reset'),
-  },
-  magicAuthLink: { sendToken: sendMagicAuthLink } = { sendToken: buildDefaultSendFn('Magic Auth') },
+  passwordResetLink,
+  magicAuthLink: { sendToken: sendMagicAuthLink } = { sendToken: () => {} },
 }: {
   listKey: string;
   identityField: string;
@@ -35,30 +26,6 @@ export function getExtendGraphQLSchema({
   passwordResetLink?: { sendToken: SendTokenFn };
   magicAuthLink?: { sendToken: SendTokenFn };
 }) {
-  // Validate the list config part of AuthConfig against the list schema
-  // TODO: This only needs to run once (but after list have init'ed, etc.); memoize?
-  // TODO: Is it possible to refactor this to leverage ts type checking? Using type guards maybe..?
-  function validateConfig(args: Record<string, string>, list: any): void {
-    const secretFieldInstance = list.fieldsByPath[secretField];
-    if (
-      typeof secretFieldInstance.compare !== 'function' ||
-      secretFieldInstance.compare.length < 2
-    ) {
-      throw new Error(
-        `Field type specified does not support required functionality. ` +
-          `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
-          ` but field type does not provide the required compare() functionality.`
-      );
-    }
-    if (typeof secretFieldInstance.generateHash !== 'function') {
-      throw new Error(
-        `Field type specified does not support required functionality. ` +
-          `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
-          ` but field type does not provide the required generateHash() functionality.`
-      );
-    }
-    // TODO: Also validate the identity field is Stringy?
-  }
 
   async function attemptAuthentication(
     args: Record<string, string>,
@@ -81,6 +48,7 @@ export function getExtendGraphQLSchema({
     const secretFieldInstance = list.fieldsByPath[secretField];
 
     // TODO: Allow additional filters to be suppled in config? eg. `validUserConditions: { isEnable: true, isVerified: true, ... }`
+    // TODO: Maybe talk to the list rather than the adapter? (Might not validate the filters though)
     const items = await list.adapter.find({ [identityField]: identity });
 
     // Identity failures with helpful errors
@@ -149,7 +117,6 @@ export function getExtendGraphQLSchema({
     const token = generateToken(20);
 
     // Save the token and related info back to the item
-    // TODO: Should we also unset the password field here if tokenType is 'passwordReset'?
     const { errors } = await ctx.keystone.executeGraphQL({
       context: ctx.keystone.createContext({ skipAccessControl: true }),
       query: `mutation($id: String, $token: String, $now: String) {
@@ -172,9 +139,25 @@ export function getExtendGraphQLSchema({
     return { success: true, message: 'Token generated!', itemId: item.id, token };
   }
 
+  // gql`query {
+  //   authenticateUserWithPassword(email:"",password:"") {
+  //     __typename
+  //     ... on UserPasswordAuthSuccess {
+  //       item
+  //       token
+  //     }
+  //     ... on UserPasswordAuthFailure {
+  //       code
+  //       message
+  //     }
+  //   }
+  // }`
+
   // Note that authenticate${listKey}WithPassword is non-nullable because it throws when auth fails
   // .. though it shouldn't, https://github.com/keystonejs/keystone/issues/2300
   return graphQLSchemaExtension({
+
+    // TODO JM: Why create an AuthenticatedItem type rather than just using the existing list type?
     typeDefs: `
       union AuthenticatedItem = ${listKey}
       type Query {
@@ -205,10 +188,10 @@ export function getExtendGraphQLSchema({
     resolvers: {
       Mutation: {
         async [gqlNames.authenticateItemWithPassword](root: any, args: any, ctx: any) {
-          validateConfig(args, ctx.keystone.lists[listKey]);
           const result = await attemptAuthentication(args, ctx.keystone.lists[listKey]);
           if (!result.success) {
             // TODO: Don't error on failure, https://github.com/keystonejs/keystone/issues/2300
+            // ^^ Yep: Enum for different errors and union success { item, token } and failure { code: Enum, message: String } types
             throw new Error(result.message);
           }
           const token = await ctx.startSession({ listKey: 'User', itemId: result.item.id });
@@ -220,10 +203,9 @@ export function getExtendGraphQLSchema({
         async [gqlNames.sendItemPasswordResetLink](root: any, args: any, ctx: any) {
           const list = ctx.keystone.lists[listKey];
           const identity = args[identityField];
-          validateConfig(args, list);
           const result = await updateAuthToken('passwordReset', identity, list, ctx);
           if (result.success) {
-            await sendPasswordResetLink({ itemId: result.itemId, identity, token: result.token });
+            await passwordResetLink?.sendToken({ itemId: result.itemId, identity, token: result.token });
           }
           return {
             success: result.success,

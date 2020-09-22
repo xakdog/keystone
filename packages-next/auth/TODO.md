@@ -22,9 +22,19 @@
   - [ ] Create UI for the signout page
   - [ ] Only generate the signout page if the config is enabled
   - [ ] Add a signout button to the Admin UI when the config is enabled
-- [ ] Implement forgotten password & magic links @molomby
-  - [ ] Define the list
-  - [ ] Add the mutations
+- [.] Implement forgotten password & magic links @molomby
+  - [x] Define the list/fields
+  - [x] Add the mutations (auth, get reset token, get magic link)
+  - [ ] Add config for `validUserConditions` as an optional set of GraphQL filters; slightly refactor loading of item(s)
+  - [ ] Don't error on failure; create types/union type; `UserPasswordAuthSuccess { item token } UserPasswordAuthFailure { code message }`
+  - [ ] Refactor the list and field validation into `validateConfig()`
+  - [ ] Hooks:
+    - [ ] Review/revise the [existing hooks](https://www.keystonejs.com/api/hooks#authentication-hooks)
+    - [ ] Implement hooks for the auth, reset pass and magic link
+    - [ ] Support rate limiting use case
+  - [ ] `Auth` to return set of fields (to be added to the list); move fields def from example app
+  - [ ] `withAuth()` to configure the list config directly
+  - [ ] Add suffix to config; use for types, mutations, field names, etc.
   - [ ] Generate the UI if it is enabled
   - [ ] Wire up the UI
 - [ ] Implement init first user @mitchell

@@ -1,9 +1,6 @@
 import { BaseGeneratedListTypes, KeystoneAdminConfig, KeystoneConfig } from '@keystone-spike/types';
 
 export type SendTokenFn = (args: {
-  // TODO: should we know, through config, how to generate a fully-qualified URL? how are we
-  // handling the protocol/server/port that the app is hosted on?
-  // JM: ^^^ Pretty sure, not?
   itemId: string | number;
   identity: string;
   token: string;
@@ -26,7 +23,6 @@ export type ResolvedAuthGqlNames = Required<AuthGqlNames> & {
   sendItemMagicAuthLinkResult: string;
 };
 
-// TODO: Allow a function to be supplied to implement rate limiting
 export type AuthConfig<GeneratedListTypes extends BaseGeneratedListTypes> = {
   /** The key of the list to authenticate users with */
   listKey: GeneratedListTypes['key'];
@@ -38,16 +34,17 @@ export type AuthConfig<GeneratedListTypes extends BaseGeneratedListTypes> = {
   // Attempts to prevent consumers of the API from being able to determine the value of identity fields
   protectIdentities?: boolean;
 
-  // Query and mutation names to use
-  gqlNames?: AuthGqlNames;
-
   passwordResetLink?: {
     /** Called when a user should be sent the forgotten password token they requested */
     sendToken: SendTokenFn;
+    /** How long do tokens stay valid for from time of issue, in minutes **/
+    tokensValidForMins: number;
   };
   magicAuthLink?: {
     /** Called when a user should be sent the magic signin token they requested */
     sendToken: SendTokenFn;
+    /** How long do tokens stay valid for from time of issue, in minutes **/
+    tokensValidForMins: number;
   };
   initFirstItem?: {
     /** Array of fields to collect, e.g ['name', 'email', 'password'] */

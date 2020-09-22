@@ -80,12 +80,14 @@ export const lists = createSchema({
 
       // TODO: Temp; these should be added by the auth package, here just until we figure out the syntax
       // TODO: Should these be named for `config.secretField`?
-      passwordResetToken: text({ access: () => false, isRequired: false }),
-      passwordResetIssuedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
-      passwordResetRedeemedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
-      magicAuthToken: text({ access: () => false, isRequired: false }),
-      magicAuthIssuedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
-      magicAuthRedeemedAt: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      // TODO: Add these to list in withAuth() and also return..
+      ${secret}ResetToken${suffix}: text({ access: () => false, isRequired: false }),
+      ${secret}ResetIssuedAt${suffix}: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      ${secret}ResetRedeemedAt${suffix}: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      magicAuthToken${suffix}: text({ access: () => false, isRequired: false }),
+      magicAuthIssuedAt${suffix}: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+      magicAuthRedeemedAt${suffix}: text({ access: () => false, isRequired: false }), // TODO: Should be datetimeUtc()
+
     },
   }),
   Post: list({

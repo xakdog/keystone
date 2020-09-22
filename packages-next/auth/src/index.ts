@@ -22,7 +22,7 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
   config: AuthConfig<GeneratedListTypes>
 ): Auth {
   const gqlNames: ResolvedAuthGqlNames = {
-    // TODO: `config.listKey` here should be something like `uppercased(singular(config.listKey))`
+    // TODO: The list should validate listKey uses CamelCase
     createInitialItem: `createInitial${config.listKey}`,
     authenticateItemWithPassword: `authenticate${config.listKey}WithPassword`,
     ItemAuthenticationWithPasswordResult: `${config.listKey}AuthenticationWithPasswordResult`,
@@ -150,6 +150,7 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
    * Validates the provided auth config; optional step when integrating auth
    */
   const validateConfig = (keystoneConfig: KeystoneConfig) => {
+    // List/listKey
     const specifiedListConfig = keystoneConfig.lists[config.listKey];
     if (keystoneConfig.lists[config.listKey] === undefined) {
       throw new Error(
@@ -167,6 +168,23 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
         )} does not have a field named ${JSON.stringify(config.identityField)}`
       );
     }
+
+    // Identity field
+    // TODO: Check for String-like typing?
+    const identityField = specifiedListConfig.fields[config.secretField];
+    if (identityField === undefined) {
+      throw new Error(
+        `In createAuth, you've specified ${JSON.stringify(
+          config.secretField
+        )} as your secretField on ${JSON.stringify(config.listKey)} but ${JSON.stringify(
+          config.listKey
+        )} does not have a field named ${JSON.stringify(config.secretField)}`
+      );
+    }
+
+    // Secret field
+    // TODO: We could make the secret field optional to disable the standard id/secret auth and password resets (ie. magic links only)
+    const secretFieldInstance = specifiedListConfig.fields[config.secretField];
     if (specifiedListConfig.fields[config.secretField] === undefined) {
       throw new Error(
         `In createAuth, you've specified ${JSON.stringify(
@@ -176,6 +194,25 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
         )} does not have a field named ${JSON.stringify(config.secretField)}`
       );
     }
+    if (
+      typeof secretFieldInstance.compare !== 'function' ||
+      secretFieldInstance.compare.length < 2
+    ) {
+      throw new Error(
+        `Field type specified does not support required functionality. ` +
+          `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
+          ` but field type does not provide the required compare() functionality.`
+      );
+    }
+    if (typeof secretFieldInstance.generateHash !== 'function') {
+      throw new Error(
+        `Field type specified does not support required functionality. ` +
+          `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
+          ` but field type does not provide the required generateHash() functionality.`
+      );
+    }
+  }
+
 
     for (const field of config.initFirstItem?.fields || []) {
       if (specifiedListConfig.fields[field] === undefined) {

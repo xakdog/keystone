@@ -20,6 +20,16 @@ const auth = createAuth({
   initFirstItem: {
     fields: ['name', 'email', 'password'],
   },
+  passwordResetLink: {
+    sendToken: function (args): void {
+      console.log(`Password reset info:`, args);
+    }
+  },
+  magicAuthLink: {
+    sendToken: function (args): void {
+      console.log(`Magic auth info:`, args);
+    }
+  }
 });
 
 const isAccessAllowed = ({ session }: { session: any }) => !!session?.listKey;
