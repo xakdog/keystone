@@ -1,4 +1,4 @@
-import { BaseGeneratedListTypes, KeystoneAdminConfig, KeystoneConfig } from '@keystone-spike/types';
+import { BaseGeneratedListTypes, KeystoneAdminConfig, KeystoneConfig, FieldType } from '@keystone-spike/types';
 
 export type SendTokenFn = (args: {
   itemId: string | number;
@@ -64,7 +64,7 @@ export type Auth = {
     getAdditionalFiles: NonNullable<KeystoneAdminConfig['getAdditionalFiles']>[number];
   };
   extendGraphqlSchema: NonNullable<KeystoneConfig['extendGraphqlSchema']>;
-  lists?: KeystoneConfig['lists'];
+  fields: { [prop: string]: FieldType };
   validateConfig: (keystoneConfig: KeystoneConfig) => void;
   withAuth: (config: KeystoneConfig) => KeystoneConfig;
 };

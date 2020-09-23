@@ -1,10 +1,12 @@
+import url from 'url';
+
 import {
   AdminFileToWrite,
   BaseGeneratedListTypes,
   KeystoneConfig,
   SerializedFieldMeta,
 } from '@keystone-spike/types';
-import url from 'url';
+import { text, timestamp } from '@keystone-spike/fields';
 
 import { getExtendGraphQLSchema } from './getExtendGraphQLSchema';
 import { initFirstItemSchemaExtension } from './initFirstItemSchemaExtension';
@@ -12,6 +14,7 @@ import { AuthConfig, Auth, ResolvedAuthGqlNames } from './types';
 
 import { signinTemplate } from './templates/signin';
 import { initTemplate } from './templates/init';
+
 
 /**
  * createAuth function
@@ -30,6 +33,18 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
     sendItemPasswordResetLinkResult: `send${config.listKey}PasswordResetLinkResult`,
     sendItemMagicAuthLink: `send${config.listKey}MagicAuthLink`,
     sendItemMagicAuthLinkResult: `send${config.listKey}MagicAuthLinkResult`,
+  };
+
+  // Fields added to the auth list
+  const additionalListFields = {
+    // TODO: Should these be named for `config.secretField`?
+    // TODO: Add these to list in withAuth() and also return..
+    [`${config.secretField}ResetToken`]: text({ access: () => false, isRequired: false }),
+    [`${config.secretField}ResetIssuedAt`]: timestamp({ access: () => false, isRequired: false }),
+    [`${config.secretField}ResetRedeemedAt`]: timestamp({ access: () => false, isRequired: false }),
+    [`magicAuthToken`]: text({ access: () => false, isRequired: false }),
+    [`magicAuthIssuedAt`]: timestamp({ access: () => false, isRequired: false }),
+    [`magicAuthRedeemedAt`]: timestamp({ access: () => false, isRequired: false }),
   };
 
   /**
@@ -184,35 +199,33 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
 
     // Secret field
     // TODO: We could make the secret field optional to disable the standard id/secret auth and password resets (ie. magic links only)
-    const secretFieldInstance = specifiedListConfig.fields[config.secretField];
-    if (specifiedListConfig.fields[config.secretField] === undefined) {
-      throw new Error(
-        `In createAuth, you've specified ${JSON.stringify(
-          config.secretField
-        )} as your secretField on ${JSON.stringify(config.listKey)} but ${JSON.stringify(
-          config.listKey
-        )} does not have a field named ${JSON.stringify(config.secretField)}`
-      );
-    }
-    if (
-      typeof secretFieldInstance.compare !== 'function' ||
-      secretFieldInstance.compare.length < 2
-    ) {
-      throw new Error(
-        `Field type specified does not support required functionality. ` +
-          `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
-          ` but field type does not provide the required compare() functionality.`
-      );
-    }
-    if (typeof secretFieldInstance.generateHash !== 'function') {
-      throw new Error(
-        `Field type specified does not support required functionality. ` +
-          `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
-          ` but field type does not provide the required generateHash() functionality.`
-      );
-    }
-  }
-
+    // const secretFieldInstance = specifiedListConfig.fields[config.secretField];
+    // if (specifiedListConfig.fields[config.secretField] === undefined) {
+    //   throw new Error(
+    //     `In createAuth, you've specified ${JSON.stringify(
+    //       config.secretField
+    //     )} as your secretField on ${JSON.stringify(config.listKey)} but ${JSON.stringify(
+    //       config.listKey
+    //     )} does not have a field named ${JSON.stringify(config.secretField)}`
+    //   );
+    // }
+    // if (
+    //   typeof secretFieldInstance.compare !== 'function' ||
+    //   secretFieldInstance.compare.length < 2
+    // ) {
+    //   throw new Error(
+    //     `Field type specified does not support required functionality. ` +
+    //       `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
+    //       ` but field type does not provide the required compare() functionality.`
+    //   );
+    // }
+    // if (typeof secretFieldInstance.generateHash !== 'function') {
+    //   throw new Error(
+    //     `Field type specified does not support required functionality. ` +
+    //       `createAuth for list '${listKey}' is using a secretField of '${secretField}'` +
+    //       ` but field type does not provide the required generateHash() functionality.`
+    //   );
+    // }
 
     for (const field of config.initFirstItem?.fields || []) {
       if (specifiedListConfig.fields[field] === undefined) {
@@ -253,6 +266,9 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
     }
     const existingExtendGraphQLSchema = keystoneConfig.extendGraphqlSchema;
 
+    // Add the additional fields to the references lists fields object
+    keystoneConfig.lists[config.listKey].fields = { ...keystoneConfig.lists[config.listKey].fields, ...additionalListFields };
+
     return {
       ...keystoneConfig,
       admin,
@@ -275,6 +291,7 @@ export function createAuth<GeneratedListTypes extends BaseGeneratedListTypes>(
       publicPages: adminPublicPages,
       getAdditionalFiles: additionalFiles,
     },
+    fields: additionalListFields,
     extendGraphqlSchema,
     validateConfig,
     withAuth,

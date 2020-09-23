@@ -32,8 +32,8 @@
     - [ ] Review/revise the [existing hooks](https://www.keystonejs.com/api/hooks#authentication-hooks)
     - [ ] Implement hooks for the auth, reset pass and magic link
     - [ ] Support rate limiting use case
-  - [ ] `Auth` to return set of fields (to be added to the list); move fields def from example app
-  - [ ] `withAuth()` to configure the list config directly
+  - [x] `Auth` to return set of fields (to be added to the list); move fields def from example app
+  - [x] `withAuth()` to configure the list config directly
   - [ ] Add suffix to config; use for types, mutations, field names, etc.
   - [ ] Generate the UI if it is enabled
   - [ ] Wire up the UI
