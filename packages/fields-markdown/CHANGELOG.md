@@ -1,5 +1,16 @@
 # @keystonejs/fields-markdown
 
+## 5.2.10
+
+### Patch Changes
+
+- [`65baf5070`](https://github.com/keystonejs/keystone/commit/65baf507067219a0487cc7d54a50476e02645e2a) [#3728](https://github.com/keystonejs/keystone/pull/3728) Thanks [@renovate](https://github.com/apps/renovate)! - Updated dependency `codemirror` to `^5.58.0`.
+
+* [`65d81dfc1`](https://github.com/keystonejs/keystone/commit/65d81dfc10c27e344b2d7aa5b799de29fb617b51) [#3613](https://github.com/keystonejs/keystone/pull/3613) Thanks [@renovate](https://github.com/apps/renovate)! - Updated dependency `react-codemirror2` to `^7.2.1`.
+
+* Updated dependencies [[`a02e69987`](https://github.com/keystonejs/keystone/commit/a02e69987902cfde38d820e68cb24b7a20ca1f6f)]:
+  - @keystonejs/fields@17.1.4
+
 ## 5.2.9
 
 ### Patch Changes
