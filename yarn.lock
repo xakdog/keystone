@@ -4697,10 +4697,19 @@
   resolved "https://registry.yarnpkg.com/@types/keystonejs__fields/-/keystonejs__fields-5.1.0.tgz#e8c335ee85a924db3284a192e50fe16740aa09fc"
   integrity sha512-Xs10ZYuMOQx3VHrq/0+1t340i2PVK+MTh5ivsnOU6Wd075IMa2/LU8yVkvLj6vi3m0Ns8mkzHOTlePNSBvWxJQ==
 
-"@types/keystonejs__keystone@*", "@types/keystonejs__keystone@^6.0.0":
+"@types/keystonejs__keystone@*":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@types/keystonejs__keystone/-/keystonejs__keystone-6.0.0.tgz#32935439a5b37e68a8d275462c492b0e0bc651ff"
   integrity sha512-29vfeYTIVV2DgkdFGvLm6oHJ/TKC0tZa87EH+AdrU0KZ3/LGWP1BbtX3HG55eldsfH8HwUyCzF/XTLRq0Lehrw==
+  dependencies:
+    "@types/express" "*"
+    "@types/keystonejs__fields" "*"
+    graphql "^14.5.8"
+
+"@types/keystonejs__keystone@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@types/keystonejs__keystone/-/keystonejs__keystone-6.0.1.tgz#4f11248c3aaac76ca92e452c78fd733bc1ba74db"
+  integrity sha512-Viu3zQGrNiGfCIPgdUrGtlMuSwFwDbH50YGej6CBJ2lXfY56/YHmNS8gRq3yADxwJqVbaBBc+GHzhdGZmknMvQ==
   dependencies:
     "@types/express" "*"
     "@types/keystonejs__fields" "*"
